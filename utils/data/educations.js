@@ -1,20 +1,20 @@
 export const educations = [
   {
     id: 1,
-    title: "Bachelor Degree",
-    duration: "2020 - Present",
-    institution: "National University of Bangladesh",
+    title: "Computer Engineering",
+    duration: "2021 - Present",
+    institution: "Universidad de la República -  Uruguay",
   },
   {
     id: 2,
     title: "Higher Secondary Certificate",
     duration: "2018 - 2020",
-    institution: "Noakhali Islamia Kamil Madrasah",
+    institution: "Liceo Militar General Artigas Anexo Norte - Liceo N° 1 Ildefonso Pablo Estévez",
   },
   {
     id: 3,
     title: "Secondary School Certificate",
-    duration: "2008 - 2018",
-    institution: "Baitus Saif Islamia Madrasah",
+    duration: "2015 - 2017",
+    institution: "Colegio Tacuabé-Colegio San Javier",
   }
 ]
