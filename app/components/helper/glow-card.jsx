@@ -7,7 +7,12 @@ const GlowCard = ({ children, identifier }) => {
   const cardRef = useRef(null);
 
   useEffect(() => {
-    if (!containerRef.current || !cardRef.current) return;
+    if (
+      typeof window === "undefined" ||
+      !containerRef.current ||
+      !cardRef.current
+    )
+      return;
 
     const CONFIG = {
       proximity: 40,
@@ -51,13 +56,18 @@ const GlowCard = ({ children, identifier }) => {
       CARD.style.setProperty("--start", angle + 90);
     };
 
-    document.body.addEventListener("pointermove", update, { passive: true });
+    // 💥 Verifica que estamos en un entorno con `document`
+    if (typeof document !== "undefined") {
+      document.body.addEventListener("pointermove", update, { passive: true });
+    }
 
     restyle();
-    update({ x: 0, y: 0 }); // Inicializa con algo
+    update({ x: 0, y: 0 }); // Inicializa el efecto
 
     return () => {
-      document.body.removeEventListener("pointermove", update);
+      if (typeof document !== "undefined") {
+        document.body.removeEventListener("pointermove", update);
+      }
     };
   }, []);
 
