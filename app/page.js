@@ -1,4 +1,6 @@
 "use client"; // 👈 muy importante, sin esto no sirve
+export const dynamic = 'force-dynamic';
+
 
 import { useEffect, useState } from "react";
 import { personalData } from "@/utils/data/personal-data";
