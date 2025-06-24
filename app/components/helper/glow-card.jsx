@@ -4,7 +4,6 @@ import { useEffect } from "react";
 
 const GlowCard = ({ children, identifier }) => {
   useEffect(() => {
-    // Solo ejecutar en el navegador
     if (typeof window === "undefined") return;
 
     const CONTAINER = document.querySelector(`.glow-container-${identifier}`);
@@ -63,16 +62,24 @@ const GlowCard = ({ children, identifier }) => {
 
     RESTYLE();
     UPDATE();
-    document.body.addEventListener("pointermove", UPDATE);
+
+    // 💥 Mover esto dentro de verificación para evitar error SSR
+    if (typeof document !== "undefined") {
+      document.body.addEventListener("pointermove", UPDATE);
+    }
 
     return () => {
-      document.body.removeEventListener("pointermove", UPDATE);
+      if (typeof document !== "undefined") {
+        document.body.removeEventListener("pointermove", UPDATE);
+      }
     };
   }, [identifier]);
 
   return (
     <div className={`glow-container-${identifier} glow-container`}>
-      <article className={`glow-card glow-card-${identifier} h-fit cursor-pointer border border-[#2a2e5a] transition-all duration-300 relative bg-[#101123] text-gray-200 rounded-xl hover:border-transparent w-full`}>
+      <article
+        className={`glow-card glow-card-${identifier} h-fit cursor-pointer border border-[#2a2e5a] transition-all duration-300 relative bg-[#101123] text-gray-200 rounded-xl hover:border-transparent w-full`}
+      >
         <div className="glows"></div>
         {children}
       </article>
