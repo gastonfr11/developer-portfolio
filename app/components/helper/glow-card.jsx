@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 const GlowCard = ({ children, identifier }) => {
-  useEffect(() => {
-    if (typeof window === "undefined") return;
+  const containerRef = useRef(null);
+  const cardRef = useRef(null);
 
-    const CONTAINER = document.querySelector(`.glow-container-${identifier}`);
-    const CARDS = document.querySelectorAll(`.glow-card-${identifier}`);
+  useEffect(() => {
+    if (!containerRef.current || !cardRef.current) return;
 
     const CONFIG = {
       proximity: 40,
@@ -18,39 +18,10 @@ const GlowCard = ({ children, identifier }) => {
       opacity: 0,
     };
 
-    const UPDATE = (event) => {
-      for (const CARD of CARDS) {
-        const CARD_BOUNDS = CARD.getBoundingClientRect();
+    const CARD = cardRef.current;
+    const CONTAINER = containerRef.current;
 
-        if (
-          event?.x > CARD_BOUNDS.left - CONFIG.proximity &&
-          event?.x < CARD_BOUNDS.left + CARD_BOUNDS.width + CONFIG.proximity &&
-          event?.y > CARD_BOUNDS.top - CONFIG.proximity &&
-          event?.y < CARD_BOUNDS.top + CARD_BOUNDS.height + CONFIG.proximity
-        ) {
-          CARD.style.setProperty("--active", 1);
-        } else {
-          CARD.style.setProperty("--active", CONFIG.opacity);
-        }
-
-        const CARD_CENTER = [
-          CARD_BOUNDS.left + CARD_BOUNDS.width * 0.5,
-          CARD_BOUNDS.top + CARD_BOUNDS.height * 0.5,
-        ];
-
-        let ANGLE =
-          (Math.atan2(event?.y - CARD_CENTER[1], event?.x - CARD_CENTER[0]) *
-            180) /
-          Math.PI;
-
-        ANGLE = ANGLE < 0 ? ANGLE + 360 : ANGLE;
-
-        CARD.style.setProperty("--start", ANGLE + 90);
-      }
-    };
-
-    const RESTYLE = () => {
-      if (!CONTAINER) return;
+    const restyle = () => {
       CONTAINER.style.setProperty("--gap", CONFIG.gap);
       CONTAINER.style.setProperty("--blur", CONFIG.blur);
       CONTAINER.style.setProperty("--spread", CONFIG.spread);
@@ -60,24 +31,40 @@ const GlowCard = ({ children, identifier }) => {
       );
     };
 
-    RESTYLE();
-    UPDATE();
+    const update = (event) => {
+      const bounds = CARD.getBoundingClientRect();
 
-    // 💥 Mover esto dentro de verificación para evitar error SSR
-    if (typeof document !== "undefined") {
-      document.body.addEventListener("pointermove", UPDATE);
-    }
+      const withinX =
+        event.x > bounds.left - CONFIG.proximity &&
+        event.x < bounds.right + CONFIG.proximity;
+      const withinY =
+        event.y > bounds.top - CONFIG.proximity &&
+        event.y < bounds.bottom + CONFIG.proximity;
+
+      CARD.style.setProperty("--active", withinX && withinY ? 1 : CONFIG.opacity);
+
+      const centerX = bounds.left + bounds.width / 2;
+      const centerY = bounds.top + bounds.height / 2;
+      let angle = (Math.atan2(event.y - centerY, event.x - centerX) * 180) / Math.PI;
+
+      if (angle < 0) angle += 360;
+      CARD.style.setProperty("--start", angle + 90);
+    };
+
+    document.body.addEventListener("pointermove", update, { passive: true });
+
+    restyle();
+    update({ x: 0, y: 0 }); // Inicializa con algo
 
     return () => {
-      if (typeof document !== "undefined") {
-        document.body.removeEventListener("pointermove", UPDATE);
-      }
+      document.body.removeEventListener("pointermove", update);
     };
-  }, [identifier]);
+  }, []);
 
   return (
-    <div className={`glow-container-${identifier} glow-container`}>
+    <div ref={containerRef} className={`glow-container-${identifier} glow-container`}>
       <article
+        ref={cardRef}
         className={`glow-card glow-card-${identifier} h-fit cursor-pointer border border-[#2a2e5a] transition-all duration-300 relative bg-[#101123] text-gray-200 rounded-xl hover:border-transparent w-full`}
       >
         <div className="glows"></div>
