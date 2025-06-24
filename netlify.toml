@@ -1,0 +1,6 @@
+[build]
+  command   = "npm run build"
+  publish   = ".next"     # Netlify sabrá usar el plugin para servir todo
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
